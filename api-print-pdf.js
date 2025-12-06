@@ -3,6 +3,12 @@ const path = require('path');
 const fs = require('fs');
 
 async function printImage(pathToImage) {
+
+    // console log all printers name
+    const printers = await printer.getPrinters();
+    console.log('Available printers:');
+    printers.forEach(p => console.log(`- ${p.name}`));
+
     // pdf-to-printer's print function
     await printer.print(pathToImage, {
         printer: 'EPSON L3550 Series',
