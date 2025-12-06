@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Print Installation System</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="libs/jquery-3.7.1.min.js"></script>
+    <script src="settings.js"></script>
+</head>
+<body>
+
+    <div class="main-container">
+        <!-- Left Side: Preview -->
+        <div class="preview-area">
+            <div class="canvas-wrapper" id="canvas-wrapper" style="width:1200px">
+                <iframe src="../artwork_geometric_flowers/index.html" title="Artwork Preview" id="artwork-frame"></iframe>
+            </div>
+        </div>
+
+        <!-- Right Side: Controls -->
+        <div class="control-panel">
+            <div class="panel-top">
+                <h1 class="artwork-title">Geometric Flowers</h1>
+                
+                <div class="controls-form">
+                    <div class="control-group">
+                        <label for="param-a">Parameter A <span>50</span></label>
+                        <input type="range" id="param-a" name="a" min="0" max="100" value="50">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="param-b">Parameter B <span>50</span></label>
+                        <input type="range" id="param-b" name="b" min="0" max="100" value="50">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="param-c">Parameter C <span>50</span></label>
+                        <input type="range" id="param-c" name="c" min="0" max="100" value="50">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="param-d">Parameter D <span>50</span></label>
+                        <input type="range" id="param-d" name="d" min="0" max="100" value="50">
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-bottom">
+                <button class="btn-print" id="save-btn" style="margin-bottom: 1rem;">Save Image</button>
+                <button class="btn-print" id="print-btn">Print</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize canvas size from settings
+        function initCanvas() {
+            const wrapper = document.getElementById('canvas-wrapper');
+            const frame = document.getElementById('artwork-frame');
+            
+            if (typeof SYSTEM_SETTINGS !== 'undefined') {
+                const aspectRatio = SYSTEM_SETTINGS.width + ' / ' + SYSTEM_SETTINGS.height;
+                wrapper.style.setProperty('--aspect-ratio', aspectRatio);
+
+                // Apply padding to the preview area (controls how large the canvas is relative to the screen)
+                if (SYSTEM_SETTINGS.previewPadding !== undefined) {
+                     const previewArea = document.querySelector('.preview-area');
+                     previewArea.style.padding = SYSTEM_SETTINGS.previewPadding + 'px';
+                }
+                
+                // Update the iframe source to include dimensions in query params
+                // This allows the p5 sketch to read them in setup()
+                const currentSrc = frame.getAttribute('src').split('?')[0]; // Remove old params if any
+                const newSrc = `${currentSrc}?w=${SYSTEM_SETTINGS.width}&h=${SYSTEM_SETTINGS.height}`;
+                frame.setAttribute('src', newSrc);
+            }
+        }
+        
+        // Call initialization
+        initCanvas();
+
+        // Simple script to update label values when sliders move
+        const inputs = document.querySelectorAll('input[type="range"]');
+        inputs.forEach(input => {
+            input.addEventListener('input', (e) => {
+                // Find the span inside the corresponding label
+                const label = e.target.previousElementSibling;
+                const span = label.querySelector('span');
+                if (span) {
+                    span.textContent = e.target.value;
+                }
+            });
+        });
+
+        // Save Image button logic
+        $('#save-btn').on('click', () => {
+            console.log("Save button clicked");
+            
+            const artworkFrame = document.getElementById('artwork-frame');
+            
+            try {
+                // Access the canvas inside the iframe
+                // Note: This requires the iframe to be on the same domain (Same-Origin Policy)
+                const canvas = artworkFrame.contentWindow.document.querySelector('canvas');
+                
+                if (canvas) {
+                    // Convert canvas to data URL
+                    const dataUrl = canvas.toDataURL('image/png');
+                    
+                    // Create a temporary link to trigger download
+                    const link = document.createElement('a');
+                    link.download = 'geometric-flower-' + Date.now() + '.png';
+                    link.href = dataUrl;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } else {
+                    console.error('Canvas not found in iframe');
+                    alert('Error: Could not find the artwork canvas.');
+                }
+            } catch (e) {
+                console.error('Error accessing iframe content:', e);
+                alert('Error: Cannot access artwork content. Make sure files are served from the same origin.');
+            }
+        });
+
+        // Print button logic
+        $('#print-btn').on('click', () => {
+            console.log("print button");
+
+        });
+    </script>
+</body>
+</html>
+
