@@ -13,7 +13,7 @@
     <div class="main-container">
         <!-- Left Side: Preview -->
         <div class="preview-area">
-            <div class="canvas-wrapper" id="canvas-wrapper" style="width:1200px">
+            <div class="canvas-wrapper" id="canvas-wrapper">
                 <iframe src="../artwork_geometric_flowers/index.html" title="Artwork Preview" id="artwork-frame"></iframe>
             </div>
             <!-- Message Toast -->
@@ -50,7 +50,9 @@
 
             <div class="panel-bottom">
                 <button class="btn-print" id="save-btn" style="margin-bottom: 1rem;">Save Image</button>
-                <button class="btn-print" id="print-btn">Print</button>
+                <button class="btn-print" id="print-pdf-btn" style="margin-bottom: 1rem;">Print (pdf-to-printer)</button>
+                <button class="btn-print" id="print-ipp-btn" style="margin-bottom: 1rem;">Print (IPP)</button>
+                <button class="btn-print" id="print-ipp-pdf-btn">Print (IPP & PDF)</button>
             </div>
         </div>
     </div>
@@ -112,19 +114,20 @@
             });
         });
 
-        // Save Image button logic
-        $('#save-btn').on('click', () => {
-            console.log("Save button clicked");
-            
-            const artworkFrame = document.getElementById('artwork-frame');
-            
-            try {
-                const canvas = artworkFrame.contentWindow.document.querySelector('canvas');
+        // Helper function to send image to backend
+        function saveImageToServer() {
+            return new Promise((resolve, reject) => {
+                const artworkFrame = document.getElementById('artwork-frame');
                 
-                if (canvas) {
+                try {
+                    const canvas = artworkFrame.contentWindow.document.querySelector('canvas');
+                    
+                    if (!canvas) {
+                        return reject(new Error('Canvas not found in iframe'));
+                    }
+
                     const dataUrl = canvas.toDataURL('image/png');
                     
-                    // Send to backend
                     fetch('/api/save-image', {
                         method: 'POST',
                         headers: {
@@ -135,31 +138,93 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            showToast(`Image saved successfully! (${data.filename})`);
+                            resolve(data);
                         } else {
-                            showToast('Failed to save image: ' + data.message, 5000);
+                            reject(new Error(data.message));
                         }
                     })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showToast('Error connecting to server.', 5000);
-                    });
-
-                } else {
-                    console.error('Canvas not found in iframe');
-                    showToast('Error: Could not find the artwork canvas.', 5000);
+                    .catch(error => reject(error));
+                    
+                } catch (e) {
+                    reject(new Error('Cannot access artwork content.'));
                 }
-            } catch (e) {
-                console.error('Error accessing iframe content:', e);
-                showToast('Error: Cannot access artwork content.', 5000);
+            });
+        }
+
+        // Save Image button logic
+        $('#save-btn').on('click', async () => {
+            console.log("Save button clicked");
+            
+            let resultData = await saveImageToServer();
+                // .then(data => {
+                //     showToast(`Image saved successfully! (${data.filename})`);
+                // })
+                // .catch(error => {
+                //     console.error('Error:', error);
+                //     showToast('Failed to save image: ' + error.message, 5000);
+                // });
+            console.log(resultData);
+            showToast("Image saved: " + resultData.filename, 3000);
+        });
+
+        // Print (pdf-to-printer) button logic
+        $('#print-pdf-btn').on('click', async () => {
+            console.log("Print (pdf-to-printer) button clicked");
+            const printApiUrl = '/api/print-pdf';
+
+            await saveAndPrint(printApiUrl);
+        });
+
+        // Print (IPP) button logic
+        $('#print-ipp-btn').on('click', async () => {
+            console.log("Print (IPP) button clicked");
+            const printApiUrl = '/api/print-ipp';
+            await saveAndPrint(printApiUrl);
+        });
+
+        // Print (IPP & PDF) button logic
+        $('#print-ipp-pdf-btn').on('click', async () => {
+            console.log("Print (IPP & PDF) button clicked");
+            const printApiUrl = '/api/print-ipp-pdf';
+            await saveAndPrint(printApiUrl);
+        });
+        
+        // Helper function to save image first, then call print API
+        async function saveAndPrint(printApiUrl) {
+            console.log("Starting print process...");
+            
+            try {
+                // 1. Save Image first using the helper function
+                const saveData = await saveImageToServer();
+                
+                console.log("Image saved:", saveData.filename);
+
+                await sleep(1000); // Small delay for better UX
+                
+                // 2. Call Print API with filename
+                const printResponse = await fetch(printApiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename: saveData.filename })
+                });
+                
+                const printData = await printResponse.json();
+                
+                if (printData.success) {
+                    showToast("Success: " + printData.message, 5000);
+                } else {
+                    showToast("Print Error: " + printData.message, 5000);
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Error: ' + error.message, 5000);
             }
-        });
+        }
 
-        // Print button logic
-        $('#print-btn').on('click', () => {
-            console.log("print button");
-
-        });
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
     </script>
 </body>
 </html>

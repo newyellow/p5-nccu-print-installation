@@ -62,7 +62,7 @@ body {
     --shadow: 0 10px 30px rgba(0,0,0,0.15);
     
     width: 100%;
-    max-width: 80vh; /* Constrain by height to keep it visible */
+    /* max-width: 80vh; Constrain by height to keep it visible */
     aspect-ratio: var(--aspect-ratio);
     background-color: var(--wrapper-bg);
     padding: var(--wrapper-padding);

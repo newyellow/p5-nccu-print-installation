@@ -23,36 +23,19 @@ if (!fs.existsSync(OUTPUT_DIR)) {
 }
 
 // API Endpoint to save image
-app.post('/api/save-image', (req, res) => {
-    const { image } = req.body;
+const apiSaveImage = require('./api-saveImage');
+app.post('/api/save-image', apiSaveImage);
 
-    if (!image) {
-        return res.status(400).json({ success: false, message: 'No image data provided' });
-    }
+// API Endpoint: Print with pdf-to-printer
+const apiPrintPdf = require('./api-print-pdf');
+app.post('/api/print-pdf', apiPrintPdf);
 
-    try {
-        // Remove header (e.g., "data:image/png;base64,")
-        const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
-        const buffer = Buffer.from(base64Data, 'base64');
+// API Endpoint: Print with node-printer
+const apiPrintIpp = require('./api-print-ipp');
+app.post('/api/print-ipp', apiPrintIpp);
 
-        const timestamp = Date.now();
-        const filename = `iteration_${timestamp}.png`;
-        const filepath = path.join(OUTPUT_DIR, filename);
-
-        fs.writeFile(filepath, buffer, (err) => {
-            if (err) {
-                console.error('Error saving file:', err);
-                return res.status(500).json({ success: false, message: 'Failed to save image' });
-            }
-            
-            console.log(`Image saved: ${filename}`);
-            res.json({ success: true, filename: filename, path: filepath });
-        });
-    } catch (error) {
-        console.error('Error processing image:', error);
-        res.status(500).json({ success: false, message: 'Server error processing image' });
-    }
-});
+const apiPrintIppPdf = require('./api-print-ipp-pdf');
+app.post('/api/print-ipp-pdf', apiPrintIppPdf);
 
 // Start server
 app.listen(PORT, async () => {

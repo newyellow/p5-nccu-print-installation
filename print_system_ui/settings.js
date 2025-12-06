@@ -4,6 +4,6 @@ const SYSTEM_SETTINGS = {
     height: 1240,
     
     // Optional: display settings
-    previewPadding: 100,
+    previewPadding: 200,
     previewBackgroundColor: '#ffffff'
 };
