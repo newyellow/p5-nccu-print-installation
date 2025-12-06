@@ -16,6 +16,8 @@
             <div class="canvas-wrapper" id="canvas-wrapper" style="width:1200px">
                 <iframe src="../artwork_geometric_flowers/index.html" title="Artwork Preview" id="artwork-frame"></iframe>
             </div>
+            <!-- Message Toast -->
+            <div id="message-toast" class="toast-container"></div>
         </div>
 
         <!-- Right Side: Controls -->
@@ -77,6 +79,23 @@
             }
         }
         
+        // Show Toast Message Function
+        function showToast(message, duration = 3000) {
+            const toast = document.getElementById('message-toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            // Clear any existing timeout to prevent overlapping
+            if (toast.timeoutId) {
+                clearTimeout(toast.timeoutId);
+            }
+            
+            // Hide after duration
+            toast.timeoutId = setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
         // Call initialization
         initCanvas();
 
@@ -100,28 +119,39 @@
             const artworkFrame = document.getElementById('artwork-frame');
             
             try {
-                // Access the canvas inside the iframe
-                // Note: This requires the iframe to be on the same domain (Same-Origin Policy)
                 const canvas = artworkFrame.contentWindow.document.querySelector('canvas');
                 
                 if (canvas) {
-                    // Convert canvas to data URL
                     const dataUrl = canvas.toDataURL('image/png');
                     
-                    // Create a temporary link to trigger download
-                    const link = document.createElement('a');
-                    link.download = 'geometric-flower-' + Date.now() + '.png';
-                    link.href = dataUrl;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
+                    // Send to backend
+                    fetch('/api/save-image', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ image: dataUrl })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast(`Image saved successfully! (${data.filename})`);
+                        } else {
+                            showToast('Failed to save image: ' + data.message, 5000);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showToast('Error connecting to server.', 5000);
+                    });
+
                 } else {
                     console.error('Canvas not found in iframe');
-                    alert('Error: Could not find the artwork canvas.');
+                    showToast('Error: Could not find the artwork canvas.', 5000);
                 }
             } catch (e) {
                 console.error('Error accessing iframe content:', e);
-                alert('Error: Cannot access artwork content. Make sure files are served from the same origin.');
+                showToast('Error: Cannot access artwork content.', 5000);
             }
         });
 

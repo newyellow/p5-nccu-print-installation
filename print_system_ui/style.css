@@ -25,6 +25,32 @@ body {
     justify-content: center;
     padding: 20px;
     overflow: hidden;
+    position: relative; /* Added for absolute positioning of toast */
+}
+
+/* Toast Notification Styles */
+.toast-container {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 4px;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none; /* Allows clicking through when hidden */
+    z-index: 100;
+    text-align: center;
+    max-width: 80%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.toast-container.show {
+    opacity: 1;
+    pointer-events: auto;
 }
 
 /* This container controls the aspect ratio and padding around the artwork */
@@ -36,7 +62,7 @@ body {
     --shadow: 0 10px 30px rgba(0,0,0,0.15);
     
     width: 100%;
-    /* max-width: 80vh; Constrain by height to keep it visible */
+    max-width: 80vh; /* Constrain by height to keep it visible */
     aspect-ratio: var(--aspect-ratio);
     background-color: var(--wrapper-bg);
     padding: var(--wrapper-padding);
@@ -123,4 +149,3 @@ body {
 .btn-print:hover {
     background-color: #333;
 }
-
