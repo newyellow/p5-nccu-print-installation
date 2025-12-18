@@ -36,7 +36,7 @@ seedRandomness();
 function getParam(urlParams, p) {
     const param = urlParams.get(p);
     if (param) {
-        let validParam = /^0\.\d{3}$/.test(param);
+        let validParam = /^(0\.\d{3}|1\.000)$/.test(param);
         if (validParam) {
             return parseFloat(param);
         }
@@ -44,7 +44,7 @@ function getParam(urlParams, p) {
     document.write("");
     window.stop && window.stop();
     throw new Error(
-        `Invalid parameter: ${p}=${param}. Must be a number between 0.000 and 0.999.`
+        `Invalid parameter: ${p}=${param}. Must be a number between 0.000 and 1.000.`
     );
 }
 
@@ -55,6 +55,12 @@ function getParams(queryString) {
     m2 = getParam(urlParams, "m2");
     m3 = getParam(urlParams, "m3");
     m4 = getParam(urlParams, "m4");
+
+    // Override randomSeedEditArt if seed parameter is provided
+    const urlSeed = urlParams.get("seed");
+    if (urlSeed) {
+        randomSeedEditArt = urlSeed;
+    }
 }
 window.addEventListener("message", (e) => {
     var data = e.data;

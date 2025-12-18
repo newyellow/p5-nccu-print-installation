@@ -13,12 +13,6 @@
  * ============================================================================
  */
 
-let m0 = 0.5;
-let m1 = 0.5;
-let m2 = 0.5;
-let m3 = 0.5;
-let m4 = 0.5;
-
 let STROKE_DENSITY = 0.1;
 let BRUSH_LENGTH = 4;
 let BRUSH_THICKNESS = 2;
@@ -36,6 +30,11 @@ let DRAW_RANGE_X = {
   max_end: 0.94
 };
 
+function editRandom(from = 0, to = 1) {
+  let diff = to - from;
+  return from + randomFull() * diff;
+}
+
 async function setup() {
   let canvasW = windowWidth;
   let canvasH = windowHeight;
@@ -47,13 +46,9 @@ async function setup() {
     canvasH = parseInt(params.h);
   }
 
-  // Read m0-m4 parameters
-  if(params.m0) m0 = parseFloat(params.m0);
-  if(params.m1) m1 = parseFloat(params.m1);
-  if(params.m2) m2 = parseFloat(params.m2);
-  if(params.m3) m3 = parseFloat(params.m3);
-  if(params.m4) m4 = parseFloat(params.m4);
-  
+  randomSeed(editRandom(0, 1000000));
+  noiseSeed(editRandom(0, 1000000));
+
   createCanvas(canvasW, canvasH);
   flex();
   background(10);
@@ -114,6 +109,8 @@ async function setup() {
       await sleep(1);
     }
   }
+  
+  triggerPreview();
 }
 
 async function randomFlower(_x, _y, _size) {

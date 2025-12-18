@@ -29,32 +29,34 @@
                 <div class="controls-form">
                     <div class="control-group">
                         <label for="param-m0">m0 <span>0.500</span></label>
-                        <input type="range" id="param-m0" class="art-param" name="m0" min="0" max="999" value="500">
+                        <input type="range" id="param-m0" class="art-param" name="m0" min="0" max="1000" value="500">
                     </div>
 
                     <div class="control-group">
                         <label for="param-m1">m1 <span>0.500</span></label>
-                        <input type="range" id="param-m1" class="art-param" name="m1" min="0" max="999" value="500">
+                        <input type="range" id="param-m1" class="art-param" name="m1" min="0" max="1000" value="500">
                     </div>
 
                     <div class="control-group">
                         <label for="param-m2">m2 <span>0.500</span></label>
-                        <input type="range" id="param-m2" class="art-param" name="m2" min="0" max="999" value="500">
+                        <input type="range" id="param-m2" class="art-param" name="m2" min="0" max="1000" value="500">
                     </div>
 
                     <div class="control-group">
                         <label for="param-m3">m3 <span>0.500</span></label>
-                        <input type="range" id="param-m3" class="art-param" name="m3" min="0" max="999" value="500">
+                        <input type="range" id="param-m3" class="art-param" name="m3" min="0" max="1000" value="500">
                     </div>
 
                     <div class="control-group">
                         <label for="param-m4">m4 <span>0.500</span></label>
-                        <input type="range" id="param-m4" class="art-param" name="m4" min="0" max="999" value="500">
+                        <input type="range" id="param-m4" class="art-param" name="m4" min="0" max="1000" value="500">
                     </div>
                 </div>
             </div>
 
             <div class="panel-bottom">
+                <button class="btn-print" id="regenerate-btn" style="margin-bottom: 1rem; background-color: #444;">Regenerate</button>
+                <button class="btn-print" id="randomize-btn" style="margin-bottom: 1rem; background-color: #666;">Randomize</button>
                 <button class="btn-print" id="save-btn" style="margin-bottom: 1rem;">Save Image</button>
                 <button class="btn-print" id="print-pdf-btn" style="margin-bottom: 1rem;">Print (pdf-to-printer)</button>
                 <button class="btn-print" id="print-ipp-btn" style="margin-bottom: 1rem;">Print (IPP)</button>
@@ -65,6 +67,8 @@
     </div>
 
     <script>
+        let currentSeed = Math.random().toString(36).substring(7);
+
         // Initialize canvas size from settings
         function initCanvas() {
             const wrapper = document.getElementById('canvas-wrapper');
@@ -160,6 +164,8 @@
                 const val = (parseInt($(this).val()) / 1000).toFixed(3);
                 params.push(`${name}=${val}`);
             });
+            // Add current seed to the query string
+            params.push(`seed=${currentSeed}`);
             return params.join('&');
         }
 
@@ -275,6 +281,39 @@
 
             console.log(resultData);
             showToast("Image saved: " + resultData.filename, 3000);
+        });
+
+        // Regenerate button logic
+        $('#regenerate-btn').on('click', () => {
+            console.log("Regenerate button clicked");
+            currentSeed = Math.random().toString(36).substring(7);
+            updateIframeParams();
+            showToast("Artwork regenerated with new seed", 2000);
+        });
+
+        // Randomize button logic
+        $('#randomize-btn').on('click', () => {
+            console.log("Randomize button clicked");
+            
+            // Randomize each slider
+            $('.art-param').each(function() {
+                const randomVal = Math.floor(Math.random() * 1001);
+                $(this).val(randomVal);
+                
+                // Update the corresponding span label
+                const label = this.previousElementSibling;
+                const span = label.querySelector('span');
+                if (span) {
+                    const formattedVal = (randomVal / 1000).toFixed(3);
+                    span.textContent = formattedVal;
+                }
+            });
+
+            // Also generate a new seed for a completely fresh look
+            currentSeed = Math.random().toString(36).substring(7);
+            
+            updateIframeParams();
+            showToast("Parameters and seed randomized", 2000);
         });
 
         // Print (pdf-to-printer) button logic
