@@ -18,13 +18,13 @@ async function printImage(pathToImage) {
 }
 
 module.exports = async (req, res) => {
-    const { filename } = req.body;
+    const { filename, direction } = req.body;
 
     if (!filename) {
         return res.status(400).json({ success: false, message: 'No filename provided' });
     }
 
-    console.log(`[pdf printer] Received print request for file: ${filename}`);
+    console.log(`[pdf printer] Received print request for file: ${filename}, direction: ${direction}`);
 
     const filepath = path.join(__dirname, '_iteration_output', filename);
 

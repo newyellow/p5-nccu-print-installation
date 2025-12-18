@@ -23,9 +23,11 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    /* Use the setting from settings.js for actual UI display */
+    padding: 40px; 
     overflow: hidden;
-    position: relative; /* Added for absolute positioning of toast */
+    position: relative;
+    height: 100vh;
 }
 
 /* Toast Notification Styles */
@@ -41,7 +43,7 @@ body {
     font-size: 14px;
     opacity: 0;
     transition: opacity 0.5s ease;
-    pointer-events: none; /* Allows clicking through when hidden */
+    pointer-events: none;
     z-index: 100;
     text-align: center;
     max-width: 80%;
@@ -53,21 +55,26 @@ body {
     pointer-events: auto;
 }
 
-/* This container controls the aspect ratio and padding around the artwork */
 .canvas-wrapper {
-    /* Adjustable settings for the canvas display */
-    --aspect-ratio: 1 / 1; /* width / height */
-    --wrapper-padding: 20px;
+    /* Fixed pixel size from settings - will be set by JS */
+    --wrapper-width: 1748px;
+    --wrapper-height: 1240px;
     --wrapper-bg: white;
     --shadow: 0 10px 30px rgba(0,0,0,0.15);
     
-    width: 100%;
-    /* max-width: 80vh; Constrain by height to keep it visible */
-    aspect-ratio: var(--aspect-ratio);
+    /* Pixel size is always exactly the same as the pixel settings */
+    width: var(--wrapper-width);
+    height: var(--wrapper-height);
+    
     background-color: var(--wrapper-bg);
-    padding: var(--wrapper-padding);
     box-shadow: var(--shadow);
     display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* Scaling logic handled by transform: scale() in JS */
+    transform-origin: center center;
+    flex-shrink: 0;
 }
 
 .canvas-wrapper iframe {
@@ -96,8 +103,19 @@ body {
 .artwork-title {
     font-size: 1.5rem;
     font-weight: 700;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     color: #333;
+}
+
+.artwork-selector {
+    width: 100%;
+    padding: 0.8rem;
+    font-size: 1rem;
+    margin-bottom: 2rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+    cursor: pointer;
 }
 
 .controls-form {

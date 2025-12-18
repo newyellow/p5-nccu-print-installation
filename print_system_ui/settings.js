@@ -5,5 +5,12 @@ const SYSTEM_SETTINGS = {
     
     // Optional: display settings
     previewPadding: 200,
-    previewBackgroundColor: '#ffffff'
+    previewBackgroundColor: '#ffffff',
+
+    artworks: [
+        { name: 'Geometric Flowers', path: '../artworks/geometric_flowers/index.html' },
+        { name: 'Flowing', path: '../artworks/flowing/index.html' },
+        { name: 'Home Planet', path: '../artworks/home_planet/index.html' },
+        { name: 'Infinity', path: '../artworks/infinity/index.html' }
+    ]
 };

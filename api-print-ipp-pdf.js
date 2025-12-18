@@ -11,15 +11,24 @@ if (!fs.existsSync(TEMP_DIR)) {
     fs.mkdirSync(TEMP_DIR);
 }
 
-function generatePDF(imagePath, pdfPath) {
+function generatePDF(imagePath, pdfPath, direction = 'landscape') {
     return new Promise((resolve, reject) => {
         try {
-            // Create a document with postcard size (100x148mm approx 283x419 points)
+            // Create a document with postcard size
             // 1mm = 2.83465 points
             // 100mm = 283.465 points
             // 148mm = 419.528 points
+            
+            let pdfW = 419.528; // Landscape by default in this context? 
+            let pdfH = 283.465;
+
+            if (direction === 'portrait') {
+                pdfW = 283.465;
+                pdfH = 419.528;
+            }
+
             const doc = new PDFDocument({
-                size: [283.465, 419.528], // Postcard size
+                size: [pdfW, pdfH],
                 margin: 0
             });
 
@@ -28,9 +37,9 @@ function generatePDF(imagePath, pdfPath) {
 
             // Add image to fit the page completely
             doc.image(imagePath, 0, 0, {
-                width: 283.465,
-                height: 419.528,
-                fit: [283.465, 419.528]
+                width: pdfW,
+                height: pdfH,
+                fit: [pdfW, pdfH]
             });
 
             doc.end();
@@ -49,7 +58,7 @@ function generatePDF(imagePath, pdfPath) {
     });
 }
 
-function printPdfIpp(pdfPath) {
+function printPdfIpp(pdfPath, direction = 'landscape') {
     return new Promise((resolve, reject) => {
         const pdfData = fs.readFileSync(pdfPath);
         const printer = ipp.Printer(PRINTER_URL);
@@ -62,7 +71,8 @@ function printPdfIpp(pdfPath) {
             },
             'job-attributes-tag': {
                 'media': 'postcard',
-                'print-scaling': 'fill'
+                'print-scaling': 'fill',
+                'orientation-requested': direction === 'portrait' ? 3 : 4
             },
             data: pdfData
         };
@@ -84,14 +94,14 @@ function printPdfIpp(pdfPath) {
 }
 
 module.exports = async (req, res) => {
-    const { filename } = req.body;
+    const { filename, direction } = req.body;
 
     if (!filename) {
         return res.status(400).json({ success: false, message: 'No filename provided' });
     }
 
     const imagePath = path.join(__dirname, '_iteration_output', filename);
-    console.log(`[ipp printer] Received print request for file: ${filename}`);
+    console.log(`[ipp printer] Received print request for file: ${filename}, direction: ${direction}`);
     console.log(`[ipp printer] Image path: ${imagePath}`);
 
     if (!fs.existsSync(imagePath)) {
@@ -102,11 +112,11 @@ module.exports = async (req, res) => {
     const pdfPath = path.join(TEMP_DIR, pdfFilename);
 
     try {
-        console.log(`[ipp printer] Generating PDF: ${pdfPath}`);
-        await generatePDF(imagePath, pdfPath);
+        console.log(`[ipp printer] Generating PDF: ${pdfPath} (${direction})`);
+        await generatePDF(imagePath, pdfPath, direction);
         
         console.log(`[ipp printer] Sending PDF to printer...`);
-        await printPdfIpp(pdfPath);
+        await printPdfIpp(pdfPath, direction);
         
         res.json({ success: true, message: 'Sent to printer (IPP/PDF)' });
     } catch (error) {

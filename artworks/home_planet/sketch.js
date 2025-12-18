@@ -16,8 +16,8 @@
  */
 
 // --- 1. 教授提供的核心設定 (Core Setup) ---
-let targetCanvasWidth = 2000;
-let targetCanvasHeight = 2000;
+let targetCanvasWidth = 1748;
+let targetCanvasHeight = 1240;
 let deviceRatio = 1;
 
 // --- 2. 藝術專案全域變數 ---

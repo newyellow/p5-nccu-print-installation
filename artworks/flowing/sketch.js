@@ -99,6 +99,7 @@ async function draw() {
             }
             pop()
         }
+        await sleep(1);
     }
 
     noFill();

@@ -23,27 +23,33 @@
         <!-- Right Side: Controls -->
         <div class="control-panel">
             <div class="panel-top">
-                <h1 class="artwork-title">Geometric Flowers</h1>
+                <h1 class="artwork-title">Select Artwork</h1>
+                <select id="artwork-select" class="artwork-selector"></select>
                 
                 <div class="controls-form">
                     <div class="control-group">
-                        <label for="param-a">Parameter A <span>50</span></label>
-                        <input type="range" id="param-a" name="a" min="0" max="100" value="50">
+                        <label for="param-m0">m0 <span>0.500</span></label>
+                        <input type="range" id="param-m0" class="art-param" name="m0" min="0" max="999" value="500">
                     </div>
 
                     <div class="control-group">
-                        <label for="param-b">Parameter B <span>50</span></label>
-                        <input type="range" id="param-b" name="b" min="0" max="100" value="50">
+                        <label for="param-m1">m1 <span>0.500</span></label>
+                        <input type="range" id="param-m1" class="art-param" name="m1" min="0" max="999" value="500">
                     </div>
 
                     <div class="control-group">
-                        <label for="param-c">Parameter C <span>50</span></label>
-                        <input type="range" id="param-c" name="c" min="0" max="100" value="50">
+                        <label for="param-m2">m2 <span>0.500</span></label>
+                        <input type="range" id="param-m2" class="art-param" name="m2" min="0" max="999" value="500">
                     </div>
 
                     <div class="control-group">
-                        <label for="param-d">Parameter D <span>50</span></label>
-                        <input type="range" id="param-d" name="d" min="0" max="100" value="50">
+                        <label for="param-m3">m3 <span>0.500</span></label>
+                        <input type="range" id="param-m3" class="art-param" name="m3" min="0" max="999" value="500">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="param-m4">m4 <span>0.500</span></label>
+                        <input type="range" id="param-m4" class="art-param" name="m4" min="0" max="999" value="500">
                     </div>
                 </div>
             </div>
@@ -62,23 +68,116 @@
         // Initialize canvas size from settings
         function initCanvas() {
             const wrapper = document.getElementById('canvas-wrapper');
-            const frame = document.getElementById('artwork-frame');
+            const selector = document.getElementById('artwork-select');
             
             if (typeof SYSTEM_SETTINGS !== 'undefined') {
-                const aspectRatio = SYSTEM_SETTINGS.width + ' / ' + SYSTEM_SETTINGS.height;
-                wrapper.style.setProperty('--aspect-ratio', aspectRatio);
+                // Set initial fixed dimensions
+                wrapper.style.setProperty('--wrapper-width', SYSTEM_SETTINGS.width + 'px');
+                wrapper.style.setProperty('--wrapper-height', SYSTEM_SETTINGS.height + 'px');
 
-                // Apply padding to the preview area (controls how large the canvas is relative to the screen)
+                // Apply padding
                 if (SYSTEM_SETTINGS.previewPadding !== undefined) {
                      const previewArea = document.querySelector('.preview-area');
                      previewArea.style.padding = SYSTEM_SETTINGS.previewPadding + 'px';
                 }
+
+                // Populate artwork selector
+                if (SYSTEM_SETTINGS.artworks && SYSTEM_SETTINGS.artworks.length > 0) {
+                    SYSTEM_SETTINGS.artworks.forEach((art, index) => {
+                        const option = document.createElement('option');
+                        option.value = index;
+                        option.textContent = art.name;
+                        selector.appendChild(option);
+                    });
+
+                    // Set initial artwork
+                    loadArtwork(0);
+
+                    // Handle selection change
+                    selector.addEventListener('change', (e) => {
+                        loadArtwork(e.target.value);
+                    });
+                }
+            }
+        }
+
+        async function loadArtwork(index) {
+            const frame = document.getElementById('artwork-frame');
+            const wrapper = document.getElementById('canvas-wrapper');
+            
+            if (SYSTEM_SETTINGS.artworks[index]) {
+                const art = SYSTEM_SETTINGS.artworks[index];
                 
-                // Update the iframe source to include dimensions in query params
-                // This allows the p5 sketch to read them in setup()
-                const currentSrc = frame.getAttribute('src').split('?')[0]; // Remove old params if any
-                const newSrc = `${currentSrc}?w=${SYSTEM_SETTINGS.width}&h=${SYSTEM_SETTINGS.height}`;
+                // Fetch artwork config
+                let direction = 'landscape';
+                try {
+                    const configPath = art.path.replace('index.html', 'artwork_config.json');
+                    const response = await fetch(configPath);
+                    const config = await response.json();
+                    direction = config.direction || 'landscape';
+                    console.log(`Loaded config for ${art.name}:`, config);
+                } catch (e) {
+                    console.warn(`Could not load config for ${art.name}, defaulting to landscape`);
+                }
+
+                // Adjust dimensions based on direction
+                let w = SYSTEM_SETTINGS.width;
+                let h = SYSTEM_SETTINGS.height;
+                if (direction === 'portrait') {
+                    // Swap dimensions if portrait
+                    w = SYSTEM_SETTINGS.height;
+                    h = SYSTEM_SETTINGS.width;
+                }
+                
+                // Store current orientation for printing
+                art.currentDirection = direction;
+                art.currentW = w;
+                art.currentH = h;
+
+                // Update UI fixed size
+                wrapper.style.setProperty('--wrapper-width', w + 'px');
+                wrapper.style.setProperty('--wrapper-height', h + 'px');
+                
+                // Recalculate scale to fit
+                updatePreviewScale();
+
+                // Get current slider values
+                const queryString = getSliderQueryString();
+                
+                // Construct new source with dimensions and parameters
+                const basePath = art.path;
+                const newSrc = `${basePath}?w=${w}&h=${h}&${queryString}`;
+                
                 frame.setAttribute('src', newSrc);
+                console.log(`Loaded artwork: ${art.name} (${direction}) with params: ${queryString}`);
+            }
+        }
+
+        function getSliderQueryString() {
+            const params = [];
+            $('.art-param').each(function() {
+                const name = $(this).attr('name');
+                const val = (parseInt($(this).val()) / 1000).toFixed(3);
+                params.push(`${name}=${val}`);
+            });
+            return params.join('&');
+        }
+
+        function updateIframeParams() {
+            const frame = document.getElementById('artwork-frame');
+            const selector = document.getElementById('artwork-select');
+            const index = selector.value;
+            const art = SYSTEM_SETTINGS.artworks[index];
+            
+            if (art && art.currentW && art.currentH) {
+                const queryString = getSliderQueryString();
+                const newSrc = `${art.path}?w=${art.currentW}&h=${art.currentH}&${queryString}`;
+                
+                // Only update if the URL actually changed to avoid unnecessary reloads
+                if (frame.getAttribute('src') !== newSrc) {
+                    frame.setAttribute('src', newSrc);
+                    console.log(`Refreshed artwork: ${art.name} with params: ${queryString}`);
+                }
             }
         }
         
@@ -99,8 +198,20 @@
             }, duration);
         }
 
-        // Call initialization
-        initCanvas();
+        // Debounce function to limit how often a function is called
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        const debouncedUpdateIframe = debounce(updateIframeParams, 300);
 
         // Simple script to update label values when sliders move
         const inputs = document.querySelectorAll('input[type="range"]');
@@ -110,8 +221,12 @@
                 const label = e.target.previousElementSibling;
                 const span = label.querySelector('span');
                 if (span) {
-                    span.textContent = e.target.value;
+                    const val = (parseInt(e.target.value) / 1000).toFixed(3);
+                    span.textContent = val;
                 }
+                
+                // Refresh artwork with a slight debounce to avoid too many reloads
+                debouncedUpdateIframe();
             });
         });
 
@@ -189,6 +304,12 @@
             showToast("Preparing web print...", 2000);
             
             try {
+                // Get current direction
+                const selector = document.getElementById('artwork-select');
+                const artIndex = selector.value;
+                const art = SYSTEM_SETTINGS.artworks[artIndex];
+                const direction = art.currentDirection || 'landscape';
+
                 // save image first
                 let resultData = await saveImageToServer();
                 console.log("Image saved:", resultData.filename);
@@ -204,7 +325,7 @@
                             <head>
                                 <title>Print Artwork</title>
                                 <style>
-                                    @page { size: auto; margin: 0mm; }
+                                    @page { size: ${direction}; margin: 0mm; }
                                     body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
                                     img { max-width: 100%; max-height: 100%; object-fit: contain; }
                                 </style>
@@ -230,6 +351,12 @@
             console.log("Starting print process...");
             
             try {
+                // Get current artwork index to get direction
+                const selector = document.getElementById('artwork-select');
+                const artIndex = selector.value;
+                const art = SYSTEM_SETTINGS.artworks[artIndex];
+                const direction = art.currentDirection || 'landscape';
+
                 // 1. Save Image first using the helper function
                 const saveData = await saveImageToServer();
                 
@@ -237,11 +364,14 @@
 
                 await sleep(1000); // Small delay for better UX
                 
-                // 2. Call Print API with filename
+                // 2. Call Print API with filename and direction
                 const printResponse = await fetch(printApiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ filename: saveData.filename })
+                    body: JSON.stringify({ 
+                        filename: saveData.filename,
+                        direction: direction
+                    })
                 });
                 
                 const printData = await printResponse.json();
@@ -261,7 +391,43 @@
         function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
+
+        function updatePreviewScale() {
+            const wrapper = document.getElementById('canvas-wrapper');
+            const previewArea = document.querySelector('.preview-area');
+            
+            if (!wrapper || !previewArea) return;
+
+            // Get available space (subtracting padding)
+            const computedStyle = window.getComputedStyle(previewArea);
+            const paddingX = parseInt(computedStyle.paddingLeft) + parseInt(computedStyle.paddingRight);
+            const paddingY = parseInt(computedStyle.paddingTop) + parseInt(computedStyle.paddingBottom);
+            
+            const availableW = previewArea.clientWidth - paddingX;
+            const availableH = previewArea.clientHeight - paddingY;
+
+            // Get artwork target size
+            const targetW = parseInt(wrapper.style.getPropertyValue('--wrapper-width'));
+            const targetH = parseInt(wrapper.style.getPropertyValue('--wrapper-height'));
+
+            if (!targetW || !targetH) return;
+
+            // Calculate scale to contain
+            const scaleX = availableW / targetW;
+            const scaleY = availableH / targetH;
+            const scale = Math.min(scaleX, scaleY);
+
+            // Apply transform
+            wrapper.style.transform = `scale(${scale})`;
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', debounce(updatePreviewScale, 100));
+
+        // Call initialization
+        initCanvas();
+        // Initial scale calculation
+        setTimeout(updatePreviewScale, 100);
     </script>
 </body>
 </html>
-

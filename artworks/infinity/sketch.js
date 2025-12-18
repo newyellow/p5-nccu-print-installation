@@ -26,7 +26,7 @@ function windowResizedUser() {
 }
 
 async function setup() {
-    createCanvas(targetCanvasWidth, targetCanvasHeight);
+    createCanvas(1240, 1748);
     SetupCanvasScale();
     flex();
     noLoop();
@@ -47,7 +47,7 @@ async function draw() {
     // let padding = 80;
     let padding =  lerp(0, 160, m0)
 
-    myDivide(padding, padding, width - padding, padding,
+    await myDivide(padding, padding, width - padding, padding,
         width - padding, height - padding, padding, height - padding);
 
     stroke(15);
@@ -92,7 +92,7 @@ function myColor_stroke() {
     noFill();
 }
 
-function myDivide(x1, y1, x2, y2, x3, y3, x4, y4) {
+async function myDivide(x1, y1, x2, y2, x3, y3, x4, y4) {
     let doDivide = true;
 
     let distWidth = dist(x1, y1, x2, y2);
@@ -107,7 +107,7 @@ function myDivide(x1, y1, x2, y2, x3, y3, x4, y4) {
     // ----------------------
     if (doDivide == false) {
         myColor_stroke();
-        lineRect(x1, y1, x2, y2, x3, y3, x4, y4);
+        await lineRect(x1, y1, x2, y2, x3, y3, x4, y4);
     } else {
         let divideRatio = lerp(0.3, 0.7, m3);
         // let divideRatio = random(0.4, 0.6);
@@ -150,15 +150,15 @@ function myDivide(x1, y1, x2, y2, x3, y3, x4, y4) {
             let rect_dx = triangle2_cx;
             let rect_dy = triangle2_cy;
             myColor_stroke();
-            lineTriangle(triangle1_ax, triangle1_ay, triangle1_bx, triangle1_by, triangle1_cx, triangle1_cy); // 原本：triangle
+            await lineTriangle(triangle1_ax, triangle1_ay, triangle1_bx, triangle1_by, triangle1_cx, triangle1_cy); // 原本：triangle
             myColor_stroke();
-            lineTriangle(triangle2_ax, triangle2_ay, triangle2_bx, triangle2_by, triangle2_cx, triangle2_cy);
+            await lineTriangle(triangle2_ax, triangle2_ay, triangle2_bx, triangle2_by, triangle2_cx, triangle2_cy);
             myColor_stroke();
-            lineTriangle(triangle3_ax, triangle3_ay, triangle3_bx, triangle3_by, triangle3_cx, triangle3_cy);
+            await lineTriangle(triangle3_ax, triangle3_ay, triangle3_bx, triangle3_by, triangle3_cx, triangle3_cy);
             myColor_stroke();
-            lineTriangle(triangle4_ax, triangle4_ay, triangle4_bx, triangle4_by, triangle4_cx, triangle4_cy);
+            await lineTriangle(triangle4_ax, triangle4_ay, triangle4_bx, triangle4_by, triangle4_cx, triangle4_cy);
             myColor_stroke();
-            myDivide(rect_ax, rect_ay, rect_bx, rect_by, rect_cx, rect_cy, rect_dx, rect_dy);
+            await myDivide(rect_ax, rect_ay, rect_bx, rect_by, rect_cx, rect_cy, rect_dx, rect_dy);
         } else {
             let triangle1_ax = x1;
             let triangle1_ay = y1;
@@ -197,15 +197,15 @@ function myDivide(x1, y1, x2, y2, x3, y3, x4, y4) {
             let rect_dx = triangle2_cx;
             let rect_dy = triangle2_cy;
             myColor_stroke();
-            lineTriangle(triangle1_ax, triangle1_ay, triangle1_bx, triangle1_by, triangle1_cx, triangle1_cy);
+            await lineTriangle(triangle1_ax, triangle1_ay, triangle1_bx, triangle1_by, triangle1_cx, triangle1_cy);
             myColor_stroke();
-            lineTriangle(triangle2_ax, triangle2_ay, triangle2_bx, triangle2_by, triangle2_cx, triangle2_cy);
+            await lineTriangle(triangle2_ax, triangle2_ay, triangle2_bx, triangle2_by, triangle2_cx, triangle2_cy);
             myColor_stroke();
-            lineTriangle(triangle3_ax, triangle3_ay, triangle3_bx, triangle3_by, triangle3_cx, triangle3_cy);
+            await lineTriangle(triangle3_ax, triangle3_ay, triangle3_bx, triangle3_by, triangle3_cx, triangle3_cy);
             myColor_stroke();
-            lineTriangle(triangle4_ax, triangle4_ay, triangle4_bx, triangle4_by, triangle4_cx, triangle4_cy);
+            await lineTriangle(triangle4_ax, triangle4_ay, triangle4_bx, triangle4_by, triangle4_cx, triangle4_cy);
             myColor_stroke();
-            myDivide(rect_ax, rect_ay, rect_bx, rect_by, rect_cx, rect_cy, rect_dx, rect_dy);
+            await myDivide(rect_ax, rect_ay, rect_bx, rect_by, rect_cx, rect_cy, rect_dx, rect_dy);
         }
     }
 }
@@ -233,11 +233,15 @@ async function lineTriangle(x1, y1, x2, y2, x3, y3) {
             let line_y2 = lerp(y3, y2, t) + random(-2, 2);
             line(line_x1, line_y1, line_x2, line_y2);
         }
+
+        if(i % 24 == 0) {
+            await sleep(1);
+        }
     }
 }
 
 // ---------------------------------------------
-function lineRect(x1, y1, x2, y2, x3, y3, x4, y4) {
+async function lineRect(x1, y1, x2, y2, x3, y3, x4, y4) {
 
     let lineCount = floor(random(50, 100));
     strokeWeight(dist(x1, y1, x2, y2) * random(1, 3) / 450);
@@ -257,6 +261,10 @@ function lineRect(x1, y1, x2, y2, x3, y3, x4, y4) {
             let y_1 = lerp(y2, y3, t);
             let y_2 = lerp(y1, y4, t);
             line(x_1, y_1, x_2, y_2);
+        }
+
+        if(i % 24 == 0) {
+            await sleep(1);
         }
     }
 }
