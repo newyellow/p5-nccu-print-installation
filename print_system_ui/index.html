@@ -394,31 +394,21 @@
 
         function updatePreviewScale() {
             const wrapper = document.getElementById('canvas-wrapper');
-            const previewArea = document.querySelector('.preview-area');
+            const selector = document.getElementById('artwork-select');
             
-            if (!wrapper || !previewArea) return;
+            if (!wrapper || !selector) return;
 
-            // Get available space (subtracting padding)
-            const computedStyle = window.getComputedStyle(previewArea);
-            const paddingX = parseInt(computedStyle.paddingLeft) + parseInt(computedStyle.paddingRight);
-            const paddingY = parseInt(computedStyle.paddingTop) + parseInt(computedStyle.paddingBottom);
+            const index = selector.value;
+            const art = SYSTEM_SETTINGS.artworks[index];
             
-            const availableW = previewArea.clientWidth - paddingX;
-            const availableH = previewArea.clientHeight - paddingY;
+            if (!art || !art.currentDirection) return;
 
-            // Get artwork target size
-            const targetW = parseInt(wrapper.style.getPropertyValue('--wrapper-width'));
-            const targetH = parseInt(wrapper.style.getPropertyValue('--wrapper-height'));
-
-            if (!targetW || !targetH) return;
-
-            // Calculate scale to contain
-            const scaleX = availableW / targetW;
-            const scaleY = availableH / targetH;
-            const scale = Math.min(scaleX, scaleY);
-
-            // Apply transform
-            wrapper.style.transform = `scale(${scale})`;
+            // Simple fixed scale based on orientation
+            if (art.currentDirection === 'landscape') {
+                wrapper.style.transform = `scale(0.66)`;
+            } else {
+                wrapper.style.transform = `scale(0.48)`;
+            }
         }
 
         // Handle window resize
