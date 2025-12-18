@@ -70,7 +70,7 @@
         let currentSeed = Math.random().toString(36).substring(7);
 
         // Initialize canvas size from settings
-        function initCanvas() {
+        async function initCanvas() {
             const wrapper = document.getElementById('canvas-wrapper');
             const selector = document.getElementById('artwork-select');
             
@@ -87,12 +87,25 @@
 
                 // Populate artwork selector
                 if (SYSTEM_SETTINGS.artworks && SYSTEM_SETTINGS.artworks.length > 0) {
-                    SYSTEM_SETTINGS.artworks.forEach((art, index) => {
+                    for (let index = 0; index < SYSTEM_SETTINGS.artworks.length; index++) {
+                        const art = SYSTEM_SETTINGS.artworks[index];
                         const option = document.createElement('option');
                         option.value = index;
-                        option.textContent = art.name;
+                        
+                        // Try to get title from config
+                        let displayTitle = art.name;
+                        try {
+                            const configPath = art.path.replace('index.html', 'artwork_config.json');
+                            const response = await fetch(configPath);
+                            const config = await response.json();
+                            if (config.title) displayTitle = config.title;
+                        } catch (e) {
+                            console.warn(`Could not load title for ${art.name}`);
+                        }
+                        
+                        option.textContent = displayTitle;
                         selector.appendChild(option);
-                    });
+                    }
 
                     // Set initial artwork
                     loadArtwork(0);
