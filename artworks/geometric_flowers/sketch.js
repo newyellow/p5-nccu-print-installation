@@ -1,3 +1,24 @@
+/*
+ * ============================================================================
+ * 《Geometric Flowers》 - Generative Art Project
+ * ============================================================================
+ * 
+ * 【參數控制 / Parameters (m0-m4)】
+ * m0 : [Color] Color mapping (Postponed)
+ * m1 : [Count] Amount of flowers spawn (0.0: few, 1.0: many)
+ * m2 : [Rotation] Rotation random range (0.0: upward, 1.0: wild range up to 160 deg)
+ * m3 : [Openness] Openness of flowers (0.0: 6 deg, 1.0: 160 deg)
+ * m4 : [Chaos] Variation range (0.0: no variation, 1.0: maximum variation)
+ * 
+ * ============================================================================
+ */
+
+let m0 = 0.5;
+let m1 = 0.5;
+let m2 = 0.5;
+let m3 = 0.5;
+let m4 = 0.5;
+
 let STROKE_DENSITY = 0.1;
 let BRUSH_LENGTH = 4;
 let BRUSH_THICKNESS = 2;
@@ -7,6 +28,13 @@ let LEAF_BASE_RATIO = 0.2;
 let LEAF_NOISE_RATIO = 0.8;
 
 let COLOR_SETTING;
+
+let DRAW_RANGE_X = {
+  min_start: 0.3,
+  min_end: 0.06,
+  max_start: 0.7,
+  max_end: 0.94
+};
 
 async function setup() {
   let canvasW = windowWidth;
@@ -18,6 +46,13 @@ async function setup() {
     canvasW = parseInt(params.w);
     canvasH = parseInt(params.h);
   }
+
+  // Read m0-m4 parameters
+  if(params.m0) m0 = parseFloat(params.m0);
+  if(params.m1) m1 = parseFloat(params.m1);
+  if(params.m2) m2 = parseFloat(params.m2);
+  if(params.m3) m3 = parseFloat(params.m3);
+  if(params.m4) m4 = parseFloat(params.m4);
   
   createCanvas(canvasW, canvasH);
   flex();
@@ -26,14 +61,15 @@ async function setup() {
 
   COLOR_SETTING = getRandomColorSetting();
 
-  let xCount = int(random(12, 60));
-  let yCount = int(random(1, 3));
+  // m1: Amount of flowers spawn
+  let xCount = int(lerp(1, 30, m1));
+  let yCount = int(lerp(1, 3, m1));
 
-  let SIZE_RATIO_MIN = random(0.06, 0.12);
-  let SIZE_RATIO_MAX = random(0.36, 0.66);
+  let SIZE_RATIO_MIN = lerp(0.09, random(0.06, 0.12), m4);
+  let SIZE_RATIO_MAX = lerp(0.51, random(0.36, 0.66), m4);
 
-  let noiseScaleY = random(0.003, 0.01);
-  let widthNoiseDiff = random(0.1, 0.2) * width;
+  let noiseScaleY = lerp(0.0065, random(0.003, 0.01), m4);
+  let widthNoiseDiff = lerp(0.15, random(0.1, 0.2), m4) * width;
   let heightNoiseDiff = 0.4 * height;
 
   let counter = 0;
@@ -41,21 +77,24 @@ async function setup() {
   for (let y = 0; y < yCount; y++) {
     for (let x = 0; x < xCount; x++) {
 
-      if (random() < 0.2)
+      if (random() < 0.2 * m4) // Chaos also affects spawn probability
         continue;
 
-      let xt = x / (xCount - 1);
-      let yt = y / (yCount - 1);
+      let xt = (xCount > 1) ? x / (xCount - 1) : 0.5;
+      let yt = (yCount > 1) ? y / (yCount - 1) : 0.5;
 
-      let newX = lerp(0.05, 0.95, xt) * width + random(-60, 60);
-      let newY = lerp(0.6, 0.6, xt) * height;
+      let xMin = lerp(DRAW_RANGE_X.min_start, DRAW_RANGE_X.min_end, m1);
+      let xMax = lerp(DRAW_RANGE_X.max_start, DRAW_RANGE_X.max_end, m1);
+
+      let newX = lerp(xMin, xMax, xt) * width + random(-60, 60) * m4;
+      let newY = lerp(0.4, 0.74, yt) * height;
 
       let noiseValue = noise(newX * 0.01, newY * 0.24);
       noiseValue = (noiseValue - 0.5) * 2.0; // -1 ~ 1
 
       // newX += noiseValue * widthNoiseDiff;
       newY += noiseValue * heightNoiseDiff;
-      newY += random(-0.2, 0.2) * height;
+      newY += random(-0.2, 0.2) * height * m4;
 
       let newZ = x + y * xCount;
 
@@ -79,31 +118,31 @@ async function setup() {
 
 async function randomFlower(_x, _y, _size) {
 
-  let hueA = processHue(COLOR_SETTING.mainColorA.hue + random(-20, 20));
-  let satA = COLOR_SETTING.mainColorA.sat + random(-20, 20);
-  let briA = COLOR_SETTING.mainColorA.bri + random(-20, 20);
+  let hueA = processHue(COLOR_SETTING.mainColorA.hue + random(-20, 20) * m4);
+  let satA = COLOR_SETTING.mainColorA.sat + random(-20, 20) * m4;
+  let briA = COLOR_SETTING.mainColorA.bri + random(-20, 20) * m4;
 
-  let hueB = processHue(COLOR_SETTING.mainColorB.hue + random(-20, 20));
-  let satB = COLOR_SETTING.mainColorB.sat + random(-20, 20);
-  let briB = COLOR_SETTING.mainColorB.bri + random(-20, 20);
-
-
-  let subHueA = processHue(COLOR_SETTING.subColorA.hue + random(-20, 20));
-  let subSatA = COLOR_SETTING.subColorA.sat + random(-20, 20);
-  let subBriA = COLOR_SETTING.subColorA.bri + random(-20, 20);
-
-  let subHueB = processHue(COLOR_SETTING.subColorB.hue + random(-20, 20));
-  let subSatB = COLOR_SETTING.subColorB.sat + random(-20, 20);
-  let subBriB = COLOR_SETTING.subColorB.bri + random(-20, 20);
+  let hueB = processHue(COLOR_SETTING.mainColorB.hue + random(-20, 20) * m4);
+  let satB = COLOR_SETTING.mainColorB.sat + random(-20, 20) * m4;
+  let briB = COLOR_SETTING.mainColorB.bri + random(-20, 20) * m4;
 
 
-  let stickHueA = processHue(COLOR_SETTING.stickColorA.hue + random(-20, 20));
-  let stickSatA = COLOR_SETTING.stickColorA.sat + random(-20, 20);
-  let stickBriA = COLOR_SETTING.stickColorA.bri + random(-20, 20);
+  let subHueA = processHue(COLOR_SETTING.subColorA.hue + random(-20, 20) * m4);
+  let subSatA = COLOR_SETTING.subColorA.sat + random(-20, 20) * m4;
+  let subBriA = COLOR_SETTING.subColorA.bri + random(-20, 20) * m4;
 
-  let stickHueB = processHue(COLOR_SETTING.stickColorB.hue + random(-20, 20));
-  let stickSatB = COLOR_SETTING.stickColorB.sat + random(-20, 20);
-  let stickBriB = COLOR_SETTING.stickColorB.bri + random(-20, 20);
+  let subHueB = processHue(COLOR_SETTING.subColorB.hue + random(-20, 20) * m4);
+  let subSatB = COLOR_SETTING.subColorB.sat + random(-20, 20) * m4;
+  let subBriB = COLOR_SETTING.subColorB.bri + random(-20, 20) * m4;
+
+
+  let stickHueA = processHue(COLOR_SETTING.stickColorA.hue + random(-20, 20) * m4);
+  let stickSatA = COLOR_SETTING.stickColorA.sat + random(-20, 20) * m4;
+  let stickBriA = COLOR_SETTING.stickColorA.bri + random(-20, 20) * m4;
+
+  let stickHueB = processHue(COLOR_SETTING.stickColorB.hue + random(-20, 20) * m4);
+  let stickSatB = COLOR_SETTING.stickColorB.sat + random(-20, 20) * m4;
+  let stickBriB = COLOR_SETTING.stickColorB.bri + random(-20, 20) * m4;
 
   // let colorRandom = random();
   // if (colorRandom < 0.06) {
@@ -168,10 +207,14 @@ async function randomFlower(_x, _y, _size) {
   let baseX = _x;
   let baseY = _y;
 
-  let pointCount = int(random(80, 120));
+  let pointCount = int(lerp(100, random(80, 120), m4));
   let pointDatas = [];
 
-  let openAngle = random(20, 100);
+  // m3: Openness of flowers (0.0: 6 deg, 1.0: 160 deg)
+  let baseOpenAngle = map(m3, 0, 1, 6, 160);
+  let openAngle = baseOpenAngle + random(-30, 30) * m4;
+  openAngle = constrain(openAngle, 2, 178);
+
   let nowEdgeRadius = _size * 0.5;
 
   // generate points first
@@ -206,8 +249,9 @@ async function randomFlower(_x, _y, _size) {
     });
   }
 
-  let rotX = random(-60, 60);
-  let rotY = random(-30, 70);
+  // m2: Rotation random range (0.0: upward, 1.0: wild range up to 160 deg)
+  let rotX = random(-80, 80) * m2 * m4;
+  let rotY = random(-80, 80) * m2 * m4;
 
   // rotate points and attach to base point
   for (let i = 0; i < pointDatas.length; i++) {
@@ -228,11 +272,11 @@ async function randomFlower(_x, _y, _size) {
 
 async function drawPoints(_basePoint, _points, _flowerC) {
 
-  let DoDrawNormal = random() < 0.5;
+  let DoDrawNormal = lerp(0.5, random(), m4) < 0.5;
 
   // draw stick
   let stickLength = dist(_basePoint.x, _basePoint.y, _basePoint.x, height);
-  let stickPoints = stickLength * random(0.2, 0.6);
+  let stickPoints = stickLength * lerp(0.4, random(0.2, 0.6), m4);
 
   for (let i = 0; i < stickPoints; i++) {
     let t = i / (stickPoints - 1);
@@ -551,4 +595,12 @@ function keyPressed() {
 // async sleep
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+function easeInOutSine(x) {
+  return -0.5 * (cos(PI * x) - 1);
+}
+
+function easeOutSine(x) {
+  return sin(PI * x);
 }
