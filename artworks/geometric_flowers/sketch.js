@@ -4,7 +4,7 @@
  * ============================================================================
  * 
  * 【參數控制 / Parameters (m0-m4)】
- * m0 : [Color] Color mapping (Postponed)
+ * m0 : [Color] Pre-defined palettes mapped across slider
  * m1 : [Count] Amount of flowers spawn (0.0: few, 1.0: many)
  * m2 : [Rotation] Rotation random range (0.0: upward, 1.0: wild range up to 160 deg)
  * m3 : [Openness] Openness of flowers (0.0: 6 deg, 1.0: 160 deg)
@@ -59,7 +59,7 @@ async function setup() {
   background(10);
   colorMode(HSB);
 
-  COLOR_SETTING = getRandomColorSetting();
+  COLOR_SETTING = getColorSettingFromM0(m0);
 
   // m1: Amount of flowers spawn
   let xCount = int(lerp(1, 30, m1));
