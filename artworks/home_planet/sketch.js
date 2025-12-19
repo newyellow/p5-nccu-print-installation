@@ -221,7 +221,7 @@ function drawUniverseStars(layer) {
   let cy = layer.height / 2 + galaxyPivotOffsetY;
   
   let area = layer.width * layer.height;
-  let dustCount = area * random(0.004, 0.005); 
+  let dustCount = area * random(0.006, 0.0075); 
 
   for (let i = 0; i < dustCount; i++) {
     let x = random(-layer.width * 0.5, layer.width * 1.5);
@@ -246,14 +246,14 @@ function drawUniverseStars(layer) {
     if (isVoidInstance) { baseDensity = 0; }
     if (random() > baseDensity * 1.1) continue;
     let h, s, b, a, pSize;
-    let baseSize = layer.width * 0.0011; 
+    let baseSize = layer.width * 0.0015; 
     if (isSilverSalt) {
         h = 0; s = 0; b = random(20, 50); a = random(0.03, 0.06);
         pSize = random(baseSize * 1.2, baseSize * 2.2);
     } else {
         if (baseDensity > random (0.35,0.5)) { 
             h = random(190, 220); s = random(5, 25); b = random(40, 60); a = random(0.04, 0.08); 
-            pSize = random(baseSize * 1.5, baseSize * 2.8); 
+            pSize = random(baseSize * 1, baseSize * 3); 
         } else { 
             h = random(220, 260); s = random(40, 70); b = random(15, 30); a = random(0.01, 0.03); 
             pSize = random(baseSize * 1.0, baseSize * 1.8); 
@@ -276,7 +276,7 @@ function drawUniverseStars(layer) {
     let x = random(layer.width);
     let y = random(layer.height);
     if (random() < 0.1) continue; 
-    let baseStarSize = layer.width * random(0.00088, 0.0013);
+    let baseStarSize = layer.width * random(0.00092, 0.0018);
     let size = random(baseStarSize * 0.8, baseStarSize * 2.2);
     let bri = pow(random(), 3.5) * 220; 
     let starSat = isSilverSalt ? 0 : random(10, 30);
