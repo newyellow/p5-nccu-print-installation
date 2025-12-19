@@ -8,27 +8,22 @@ async function printImage(pathToImage, direction = 'landscape', dpi = 300) {
     console.log('Available printers:');
     printers.forEach(p => console.log(`- ${p.name}`));
 
-    console.log(`[pdf printer] Printing image directly: ${pathToImage} at ${dpi} DPI`);
+    console.log(`[pdf printer] Printing image directly: ${pathToImage} at ${dpi} DPI, direction: ${direction}`);
     
-    // Using 'fit' to make it fill the paper as requested
-    // and passing unix-specific options for resolution and better layout
+    // Using explicit unix flags to ensure orientation and scaling are handled by the system driver
     const options = {
         printer: 'EPSON L3550 Series',
-        paperSize: 'A6',
-        scale: 'fit', // "fit" usually maps to fit-to-page, ensuring it fills the printable area
+        // We use unix flags for better control on macOS
         unix: [
             `-o resolution=${dpi}dpi`,
-            '-o image-position=center',
+            '-o media=A6',
             '-o fit-to-page',
-            '-o media=A6.Borderless' // Attempting borderless if the driver supports it
+            '-o image-position=center',
+            // orientation-requested: 3=portrait, 4=landscape
+            direction === 'portrait' ? '-o orientation-requested=3' : '-o orientation-requested=4',
+            '-o no-auto-rotate' // Prevent driver from rotating image based on its own guess
         ]
     };
-
-    if (direction === 'portrait') {
-        options.orientation = 'portrait';
-    } else {
-        options.orientation = 'landscape';
-    }
 
     await printer.print(pathToImage, options);
 }
