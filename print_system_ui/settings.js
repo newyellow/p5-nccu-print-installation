@@ -11,6 +11,7 @@ const SYSTEM_SETTINGS = {
         { name: 'Geometric Flowers', path: '../artworks/geometric_flowers/index.html' },
         { name: 'Flowing', path: '../artworks/flowing/index.html' },
         { name: 'Home Planet', path: '../artworks/home_planet/index.html' },
-        { name: 'Infinity', path: '../artworks/infinity/index.html' }
+        { name: 'Infinity', path: '../artworks/infinity/index.html' },
+        { name: 'Folding', path: '../artworks/folding/index.html' }
     ]
 };
