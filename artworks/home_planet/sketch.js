@@ -291,7 +291,7 @@ function drawUniverseStars(layer) {
 
 // 繪製流星 (隨機但受種子鎖定)
 function drawShootingStars(layer) {
-  if (random() > 0.33) return;
+  if (random() > 0.66) return;
   
   let countRoll = random();
   let count;
@@ -326,7 +326,7 @@ function drawShootingStars(layer) {
     grad.addColorStop(0.0, tailColor); 
     grad.addColorStop(1.0, headColor); 
     ctx.strokeStyle = grad;
-    layer.strokeWeight(random(0.8, 1.8)); 
+    layer.strokeWeight(random(3, 6)); 
     ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x2, y2); ctx.stroke();
   }
   layer.pop();
