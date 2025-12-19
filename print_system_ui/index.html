@@ -66,6 +66,15 @@
         </div>
     </div>
 
+    <!-- Printing Overlay -->
+    <div id="printing-overlay" class="printing-overlay">
+        <div class="printing-message-box">
+            <h2>Printing in progress...</h2>
+            <p>Please wait while the artwork is being sent to the printer.</p>
+            <div id="countdown-timer" class="countdown-timer">10</div>
+        </div>
+    </div>
+
     <script>
         let currentSeed = Math.random().toString(36).substring(7);
 
@@ -332,8 +341,25 @@
         // Print (pdf-to-printer) button logic
         $('#print-pdf-btn').on('click', async () => {
             console.log("Print (pdf-to-printer) button clicked");
-            const printApiUrl = '/api/print-pdf';
+            
+            // Show the printing overlay
+            const overlay = document.getElementById('printing-overlay');
+            const timerDisplay = document.getElementById('countdown-timer');
+            overlay.classList.add('show');
+            
+            let timeLeft = 10;
+            timerDisplay.textContent = timeLeft;
+            
+            const countdownInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    overlay.classList.remove('show');
+                }
+            }, 1000);
 
+            const printApiUrl = '/api/print-pdf';
             await saveAndPrint(printApiUrl);
         });
 
