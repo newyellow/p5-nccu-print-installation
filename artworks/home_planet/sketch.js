@@ -305,7 +305,7 @@ function drawShootingStars(layer) {
   for (let i = 0; i < count; i++) {
     let x = random(layer.width);
     let y = random(layer.height);
-    let len = random(layer.width * 0.015, layer.width * 0.05); 
+    let len = random(layer.width * 0.03, layer.width * 0.1); 
     let angle = random(TAU); 
     let x2 = x + cos(angle) * len;
     let y2 = y + sin(angle) * len;
