@@ -36,8 +36,8 @@ function editRandom(from = 0, to = 1) {
 }
 
 async function setup() {
-  let canvasW = windowWidth;
-  let canvasH = windowHeight;
+  let canvasW = 1748;
+  let canvasH = 1240;
   
   // Check if there are query parameters for size
   let params = getURLParams();
@@ -50,6 +50,7 @@ async function setup() {
   noiseSeed(editRandom(0, 1000000));
 
   createCanvas(canvasW, canvasH);
+  pixelDensity(2);
   flex();
   background(10);
   colorMode(HSB);

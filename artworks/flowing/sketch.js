@@ -31,8 +31,9 @@ let countY = [100, 30];
 let mystyle;
 
 async function setup() {
-    createCanvas(targetCanvasWidth, targetCanvasHeight);
-    SetupCanvasScale();
+    createCanvas(1748, 1240);
+    // SetupCanvasScale();
+    pixelDensity(2);
     flex();
     noLoop();
 }

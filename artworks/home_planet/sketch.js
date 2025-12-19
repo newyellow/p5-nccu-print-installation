@@ -70,8 +70,9 @@ function windowResizedUser() {
 }
 
 async function setup() {
-    createCanvas(targetCanvasWidth, targetCanvasHeight);
-    SetupCanvasScale();
+    createCanvas(1748, 1240);
+    // SetupCanvasScale();
+    pixelDensity(2);
     flex(); // p5.flex 啟動響應式
 
     colorMode(HSB, 360, 100, 100);

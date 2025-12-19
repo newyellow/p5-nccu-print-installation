@@ -51,7 +51,7 @@ function generateA6PDF(imagePath, pdfPath, direction = 'landscape') {
     });
 }
 
-async function printImage(pathToImage, direction = 'landscape', dpi = 300) {
+async function printImage(pathToImage, direction = 'landscape', dpi = 600) {
     // Log available printers for debugging
     const printers = await printer.getPrinters();
     console.log('Available printers:');
@@ -98,7 +98,7 @@ async function printImage(pathToImage, direction = 'landscape', dpi = 300) {
 }
 
 module.exports = async (req, res) => {
-    const { filename, direction, dpi = 300 } = req.body;
+    const { filename, direction, dpi = 600 } = req.body;
 
     if (!filename) {
         return res.status(400).json({ success: false, message: 'No filename provided' });

@@ -1,7 +1,7 @@
 
 let targetCanvasWidth = 1240;
 let targetCanvasHeight = 1748;
-let deviceRatio = 1;
+let deviceRatio = 2;
 
 function editRandom(from = 0, to = 1) {
     let diff = to - from;
@@ -27,7 +27,8 @@ function windowResizedUser() {
 
 async function setup() {
     createCanvas(1240, 1748);
-    SetupCanvasScale();
+    // SetupCanvasScale();
+    pixelDensity(2);
     flex();
     noLoop();
 }
